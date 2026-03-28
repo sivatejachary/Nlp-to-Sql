@@ -28,7 +28,6 @@ This project is fully containerized using Docker and can run without manual setu
 
 ## 🏗️ Project Structure
 
-.
 ├── main.py              # FastAPI application  
 ├── setup_database.py   # Create DB + insert dummy data  
 ├── seed_memory.py      # Memory seeding script  
@@ -133,21 +132,21 @@ Response:
 
 ## 🏗️ Architecture Overview
 
-User Question (Natural Language)
-        ↓
-FastAPI Backend
-        ↓
-Vanna 2.0 Agent
-(Gemini LLM Service + Run SQL Tool + Demo Agent Memory)
-        ↓
-SQL Validator
-(Only SELECT queries allowed, no dangerous operations)
-        ↓
-SQLite Database Execution
-(Using built-in SqliteRunner)
-        ↓
-Response to User
-(Results + Summary + Charts)  
+ User Question (Natural Language)
+         ↓
+ FastAPI Backend
+         ↓
+ Vanna 2.0 Agent
+ (Gemini LLM Service + Run SQL Tool + Demo Agent Memory)
+         ↓
+ SQL Validator
+ (Only SELECT queries allowed, no dangerous operations)
+         ↓
+ SQLite Database Execution
+ (Using built-in SqliteRunner)
+         ↓
+ Response to User
+ (Results + Summary + Charts)  
 
 ---
 
