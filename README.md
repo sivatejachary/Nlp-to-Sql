@@ -105,9 +105,7 @@ GET /health
 
 Response:
 
-{
-  "status": "ok"
-}
+{ "status": "ok", "database": "connected", "agent_memory_items": 15 }
 
 ---
 
