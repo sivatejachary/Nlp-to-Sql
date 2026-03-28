@@ -133,20 +133,21 @@ Response:
 ## 🏗️ Architecture Overview
 
 User (Natural Language Query) <br>
-↓ <br>
+            ↓ <br>
 FastAPI Backend (API Layer) <br>
-↓ <br>
+            ↓ <br>
 Vanna 2.0 Agent <br>
 (Gemini LLM Service + RunSqlTool + Agent Memory) <br>
-↓ <br>
+            ↓ <br>
 SQL Validator <br>
 (Only SELECT queries allowed, prevents unsafe queries) <br>
-↓ <br>
+            ↓ <br>
 SQLite Database <br>
 (Execution using SqliteRunner) <br>
-↓ <br>
+            ↓ <br>
 Response to User <br>
-(Results + Summary + Charts)
+(Results + Summary)
+
 ---
 
 ## 📊 Features
