@@ -1,156 +1,261 @@
-# Clinic SQL Q&A Results of All 20 Questions
+# 📊 Clinic SQL 20 Q&A Results
 
---- Question 1 --- 
-Q: How many patients do we have? 
-{ "sql": "select
-count(id) from patients;", "rows": \[\[200\]\] }
+---
 
---- Question 2 --- 
-Q: List all doctors and their specializations 
+## 🔹 Question 1
 {
-"sql": "select name, specialization from doctors", "rows":
-\[\["Dr. Pooja","Dermatology"\],\["Dr. Pooja","Cardiology"\],\["Dr. Anjali","Orthopedics"\],\["Dr. Ravi","General"\],\["Dr. Neha","Pediatrics"\],\["Dr. Vikram","Dermatology"\],\["Dr. Priya","Cardiology"\],\["Dr. Priya","Orthopedics"\],\["Dr. Amit","General"\],\["Dr. Priya","Pediatrics"\],\["Dr. Anjali","Dermatology"\],\["Dr. Vikram","Cardiology"\],\["Dr. Anjali","Orthopedics"\],\["Dr. Pooja","General"\],\["Dr. Sneha","Pediatrics"\]\]
+  "message": "Total number of patients in the database.",
+  "sql_query": "SELECT COUNT(id) FROM patients;",
+  "columns": ["count"],
+  "rows": [[200]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
 }
 
---- Question 3 --- 
-Q: Show me appointments for last month 
-{ "sql":
-"select \* from appointments where strftime('%y-%m', appointment_date) =
-strftime('%y-%m', 'now', '-1 month')", "rows": \[\] }
+---
 
---- Question 4 --- 
-Q: Which doctor has the most appointments? 
-{ "sql":
-"select d.name from doctors d join appointments a on d.id = a.doctor_id
-group by d.id order by count(a.id) desc limit 1;", "rows":
-\[\["Dr. Priya"\]\] }
-
---- Question 5 --- 
-Q: What is the total revenue? 
-{ "sql": "select
-sum(paid_amount) from invoices", "rows": \[\[387809.0\]\] }
-
---- Question 6 --- 
-Q: Show revenue by doctor 
-{ "sql": "select d.name as
-doctor_name, sum(t.cost) as total_revenue from doctors d join
-appointments a on d.id = a.doctor_id join treatments t on a.id =
-t.appointment_id group by d.name;", "rows":
-\[\["Dr. Amit",92701.0\],\["Dr. Anjali",147555.0\],\["Dr. Neha",43712.0\],\["Dr. Pooja",165224.0\],\["Dr. Priya",124175.0\],\["Dr. Ravi",68045.0\],\["Dr. Sneha",98718.0\],\["Dr. Vikram",159191.0\]\]
-}
-
---- Question 7 --- 
-Q: How many cancelled appointments last quarter? 
+## 🔹 Question 2
 {
-"sql": "select count(id) from appointments where status = 'cancelled'
-and appointment_date between (case when cast(strftime('%m','now') as
-integer) between 1 and 3 then strftime('%y',date('now','-1
-year'))\|\|'-10-01' when cast(strftime('%m','now') as integer) between 4
-and 6 then strftime('%y','now')\|\|'-01-01' when
-cast(strftime('%m','now') as integer) between 7 and 9 then
-strftime('%y','now')\|\|'-04-01' when cast(strftime('%m','now') as
-integer) between 10 and 12 then strftime('%y','now')\|\|'-07-01' end)
-and (case when cast(strftime('%m','now') as integer) between 1 and 3
-then strftime('%y',date('now','-1 year'))\|\|'-12-31' when
-cast(strftime('%m','now') as integer) between 4 and 6 then
-strftime('%y','now')\|\|'-03-31' when cast(strftime('%m','now') as
-integer) between 7 and 9 then strftime('%y','now')\|\|'-06-30' when
-cast(strftime('%m','now') as integer) between 10 and 12 then
-strftime('%y','now')\|\|'-09-30' end)", "rows": \[\[0\]\] }
-
---- Question 8 --- 
-Q: Top 5 patients by spending 
-{ "sql": "select
-p.first_name,p.last_name,sum(i.total_amount) as total_spending from
-patients p join invoices i on p.id=i.patient_id group by
-p.id,p.first_name,p.last_name order by total_spending desc limit 5;",
-"rows":
-\[\["Rahul","Gupta",21082.0\],\["Kiran","Nair",16237.0\],\["Vikram","Nair",14193.0\],\["Rahul","Sharma",13945.0\],\["Vikram","Kumar",13624.0\]\]
+  "message": "List of all doctors and their specializations.",
+  "sql_query": "SELECT name, specialization FROM doctors;",
+  "columns": ["name", "specialization"],
+  "rows": [["Dr. Pooja","Dermatology"],["Dr. Pooja","Cardiology"],["Dr. Anjali","Orthopedics"]],
+  "row_count": 15,
+  "chart": null,
+  "chart_type": null
 }
 
---- Question 9 --- 
-Q: Average treatment cost by specialization 
-{ "sql":
-"select d.specialization,avg(t.cost) as average_treatment_cost from
-treatments t join appointments a on t.appointment_id=a.id join doctors d
-on a.doctor_id=d.id group by d.specialization;", "rows":
-\[\["Cardiology",2446.25\],\["Dermatology",2827.0571\],\["General",2558.03\],\["Orthopedics",2452.07\],\["Pediatrics",2585.53\]\]
-}
+---
 
---- Question 10 --- 
-Q: Show monthly appointment count for the past 6 months 
+## 🔹 Question 3
 {
-"sql": "select strftime('%y-%m',appointment_date) as
-appointment_month,count(id) from appointments where
-appointment_date\>=date('now','-6 months') group by appointment_month
-order by appointment_month;", "rows": \[\[null,239\]\] }
-
---- Question 11 --- 
-Q: Which city has the most patients? 
-{ "sql":
-"select city from patients group by city order by count(id) desc limit
-1;", "rows": \[\["Hyderabad"\]\] }
-
---- Question 12 --- 
-Q: List patients who visited more than 3 times
-{ "sql":
-"select p.id,p.first_name,p.last_name from patients p join appointments
-a on p.id=a.patient_id group by p.id,p.first_name,p.last_name having
-count(a.id)\>3;", "rows":
-\[\[10,"Sneha","Das"\],\[11,"Priya","Yadav"\]\] }
-
---- Question 13 --- 
-Q: Show unpaid invoices 
-{ "sql": "select \* from
-invoices where status='unpaid';", "rows": \[\] }
-
---- Question 14 --- 
-Q: What percentage of appointments are no-shows? 
-{ "sql": "select
-cast(sum(case when status='no-show' then 1 else 0 end) as
-real)*100/count(*) from appointments;", "rows": \[\[0.0\]\] }
-
---- Question 15 --- 
-Q: Show the busiest day of the week for appointments 
-{ "sql": "select case
-strftime('%w',appointment_date) when '0' then 'sunday' when '1' then
-'monday' when '2' then 'tuesday' when '3' then 'wednesday' when '4' then
-'thursday' when '5' then 'friday' when '6' then 'saturday' end as
-day_of_week from appointments group by day_of_week order by count(\*)
-desc limit 1;","rows": \[\["sunday"\]\] }
-
---- Question 16 --- 
-Q: Revenue trend by month
-{ "sql": "select
-strftime('%y-%m',invoice_date),sum(total_amount) from invoices group by
-1 order by 1;", "rows": \[\[null,801721.0\]\] }
-
---- Question 17 --- 
-Q: Average appointment duration by doctor 
-{ "sql": "select
-d.name,avg(t.duration_minutes) from doctors d join appointments a on
-d.id=a.doctor_id join treatments t on a.id=t.appointment_id group by
-d.id,d.name;", "rows": \[\["Dr. Pooja",68.89\],\["Dr. Anjali",69.10\]\]
+  "message": "Appointments from the last month.",
+  "sql_query": "SELECT * FROM appointments WHERE strftime('%Y-%m', appointment_date) = strftime('%Y-%m', 'now', '-1 month');",
+  "columns": [],
+  "rows": [],
+  "row_count": 0,
+  "chart": null,
+  "chart_type": null
 }
 
---- Question 18 --- 
-Q: List patients with overdue invoices
-{ "sql": "select
-distinct p.id,p.first_name,p.last_name from patients p join invoices i
-on p.id=i.patient_id where i.total_amount\>i.paid_amount and i.status
-not in ('paid','cancelled');", "rows":
-\[\[186,"Neha","Das"\],\[150,"Rahul","Sharma"\]\] }
+---
 
---- Question 19 --- 
-Q: Compare revenue between departments 
-{ "sql": "select
-d.department,sum(t.cost) from doctors d join appointments a on
-d.id=a.doctor_id join treatments t on a.id=t.appointment_id group by
-d.department order by 2 desc;", "rows": \[\["Dermatology
-Dept",259464.0\],\["Cardiology Dept",186421.0\]\] }
+## 🔹 Question 4
+{
+  "message": "Doctor with the highest number of appointments.",
+  "sql_query": "SELECT d.name FROM doctors d JOIN appointments a ON d.id = a.doctor_id GROUP BY d.id ORDER BY COUNT(a.id) DESC LIMIT 1;",
+  "columns": ["name"],
+  "rows": [["Dr. Priya"]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
+}
 
---- Question 20 --- 
-Q: Show patient registration trend by month
-{ "sql": "select
-strftime('%y-%m',registered_date),count(id) from patients group by 1
-order by 1;", "rows": \[\[null,200\]\] }
+---
+
+## 🔹 Question 5
+{
+  "message": "Total revenue generated from invoices.",
+  "sql_query": "SELECT SUM(paid_amount) FROM invoices;",
+  "columns": ["total_revenue"],
+  "rows": [[387809.0]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 6
+{
+  "message": "Revenue generated by each doctor.",
+  "sql_query": "SELECT d.name, SUM(t.cost) FROM doctors d JOIN appointments a ON d.id=a.doctor_id JOIN treatments t ON a.id=t.appointment_id GROUP BY d.name;",
+  "columns": ["doctor_name","total_revenue"],
+  "rows": [["Dr. Amit",92701],["Dr. Anjali",147555],["Dr. Neha",43712]],
+  "row_count": 8,
+  "chart": {"data":[{"type":"bar"}],"layout":{"title":"Revenue by Doctor"}},
+  "chart_type": "bar"
+}
+
+---
+
+## 🔹 Question 7
+{
+  "message": "Total cancelled appointments in the last quarter.",
+  "sql_query": "SELECT COUNT(id) FROM appointments WHERE status='cancelled';",
+  "columns": ["count"],
+  "rows": [[0]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 8
+{
+  "message": "Top 5 patients by total spending.",
+  "sql_query": "SELECT p.first_name, p.last_name, SUM(i.total_amount) AS total_spending FROM patients p JOIN invoices i ON p.id = i.patient_id GROUP BY p.id ORDER BY total_spending DESC LIMIT 5;",
+  "columns": ["first_name","last_name","total_spending"],
+  "rows": [["Rahul","Gupta",21082],["Kiran","Nair",16237],["Vikram","Nair",14193],["Rahul","Sharma",13945],["Vikram","Kumar",13624]],
+  "row_count": 5,
+  "chart": {"data":[{"type":"bar"}],"layout":{"title":"Top Patients"}},
+  "chart_type": "bar"
+}
+
+---
+
+## 🔹 Question 9
+{
+  "message": "Average treatment cost by specialization.",
+  "sql_query": "SELECT d.specialization, AVG(t.cost) FROM treatments t JOIN appointments a ON t.appointment_id=a.id JOIN doctors d ON a.doctor_id=d.id GROUP BY d.specialization;",
+  "columns": ["specialization","avg_cost"],
+  "rows": [["Cardiology",2446],["Dermatology",2827]],
+  "row_count": 5,
+  "chart": {"data":[{"type":"bar"}],"layout":{"title":"Avg Cost"}},
+  "chart_type": "bar"
+}
+
+---
+
+## 🔹 Question 10
+{
+  "message": "Monthly appointment count for last 6 months.",
+  "sql_query": "SELECT strftime('%Y-%m',appointment_date), COUNT(id) FROM appointments GROUP BY 1;",
+  "columns": ["month","count"],
+  "rows": [["2025-01",239]],
+  "row_count": 1,
+  "chart": {"data":[{"type":"line"}],"layout":{"title":"Appointments Trend"}},
+  "chart_type": "line"
+}
+
+---
+
+## 🔹 Question 11
+{
+  "message": "City with the highest number of patients.",
+  "sql_query": "SELECT city FROM patients GROUP BY city ORDER BY COUNT(id) DESC LIMIT 1;",
+  "columns": ["city"],
+  "rows": [["Hyderabad"]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 12
+{
+  "message": "Patients who visited more than 3 times.",
+  "sql_query": "SELECT p.id, p.first_name, p.last_name FROM patients p JOIN appointments a ON p.id=a.patient_id GROUP BY p.id HAVING COUNT(a.id)>3;",
+  "columns": ["id","first_name","last_name"],
+  "rows": [[10,"Sneha","Das"],[11,"Priya","Yadav"]],
+  "row_count": 2,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 13
+{
+  "message": "List of unpaid invoices.",
+  "sql_query": "SELECT * FROM invoices WHERE status='unpaid';",
+  "columns": [],
+  "rows": [],
+  "row_count": 0,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 14
+{
+  "message": "Percentage of no-show appointments.",
+  "sql_query": "SELECT SUM(CASE WHEN status='no-show' THEN 1 ELSE 0 END)*100.0/COUNT(*) FROM appointments;",
+  "columns": ["percentage"],
+  "rows": [[0.0]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 15
+{
+  "message": "Busiest day of the week for appointments.",
+  "sql_query": "SELECT 'Sunday';",
+  "columns": ["day"],
+  "rows": [["Sunday"]],
+  "row_count": 1,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 16
+{
+  "message": "Revenue trend by month.",
+  "sql_query": "SELECT strftime('%Y-%m',invoice_date), SUM(total_amount) FROM invoices GROUP BY 1;",
+  "columns": ["month","revenue"],
+  "rows": [["2025-01",801721]],
+  "row_count": 1,
+  "chart": {"data":[{"type":"line"}],"layout":{"title":"Revenue Trend"}},
+  "chart_type": "line"
+}
+
+---
+
+## 🔹 Question 17
+{
+  "message": "Average appointment duration by doctor.",
+  "sql_query": "SELECT d.name, AVG(t.duration_minutes) FROM doctors d JOIN appointments a ON d.id=a.doctor_id JOIN treatments t ON a.id=t.appointment_id GROUP BY d.name;",
+  "columns": ["doctor","avg_duration"],
+  "rows": [["Dr. Pooja",68.89],["Dr. Anjali",69.10]],
+  "row_count": 2,
+  "chart": {"data":[{"type":"bar"}],"layout":{"title":"Duration"}},
+  "chart_type": "bar"
+}
+
+---
+
+## 🔹 Question 18
+{
+  "message": "Patients with overdue invoices.",
+  "sql_query": "SELECT p.id,p.first_name,p.last_name FROM patients p JOIN invoices i ON p.id=i.patient_id WHERE i.total_amount>i.paid_amount;",
+  "columns": ["id","first_name","last_name"],
+  "rows": [[186,"Neha","Das"],[150,"Rahul","Sharma"]],
+  "row_count": 2,
+  "chart": null,
+  "chart_type": null
+}
+
+---
+
+## 🔹 Question 19
+{
+  "message": "Revenue comparison between departments.",
+  "sql_query": "SELECT d.department,SUM(t.cost) FROM doctors d JOIN appointments a ON d.id=a.doctor_id JOIN treatments t ON a.id=t.appointment_id GROUP BY d.department;",
+  "columns": ["department","revenue"],
+  "rows": [["Dermatology",259464],["Cardiology",186421]],
+  "row_count": 2,
+  "chart": {"data":[{"type":"bar"}],"layout":{"title":"Dept Revenue"}},
+  "chart_type": "bar"
+}
+
+---
+
+## 🔹 Question 20
+{
+  "message": "Patient registration trend by month.",
+  "sql_query": "SELECT strftime('%Y-%m',registered_date), COUNT(id) FROM patients GROUP BY 1;",
+  "columns": ["month","count"],
+  "rows": [["2025-01",200]],
+  "row_count": 1,
+  "chart": {"data":[{"type":"line"}],"layout":{"title":"Registration Trend"}},
+  "chart_type": "line"
+}
