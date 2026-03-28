@@ -32,7 +32,7 @@ This project is fully containerized using Docker and can run without manual setu
 ├── main.py              # FastAPI application  
 ├── setup_database.py   # Create DB + insert dummy data  
 ├── seed_memory.py      # Memory seeding script  
-├── vanna_setup.py      # Agent setup
+├── vanna_setup.py      # Agent setup     
 ├── sql_validator.py    # SQL validation  
 ├── requirements.txt  
 └── clinic.db  
@@ -49,8 +49,8 @@ https://huggingface.co/spaces/Ai-Thalli/vanna
 
 Or use:
 
-git clone https://huggingface.co/spaces/Ai-Thalli/vanna
-cd vanna
+git clone https://github.com/sivatejachary/Nlp-to-Sql
+cd Nlp-to-sql
 
 ---
 
