@@ -132,22 +132,21 @@ Response:
 
 ## 🏗️ Architecture Overview
 
- User Question (Natural Language)
-         ↓
- FastAPI Backend
-         ↓
- Vanna 2.0 Agent
- (Gemini LLM Service + Run SQL Tool + Demo Agent Memory)
-         ↓
- SQL Validator
- (Only SELECT queries allowed, no dangerous operations)
-         ↓
- SQLite Database Execution
- (Using built-in SqliteRunner)
-         ↓
- Response to User
- (Results + Summary + Charts)  
-
+User (Natural Language Query) <br>
+↓ <br>
+FastAPI Backend (API Layer) <br>
+↓ <br>
+Vanna 2.0 Agent <br>
+(Gemini LLM Service + RunSqlTool + Agent Memory) <br>
+↓ <br>
+SQL Validator <br>
+(Only SELECT queries allowed, prevents unsafe queries) <br>
+↓ <br>
+SQLite Database <br>
+(Execution using SqliteRunner) <br>
+↓ <br>
+Response to User <br>
+(Results + Summary + Charts)
 ---
 
 ## 📊 Features
