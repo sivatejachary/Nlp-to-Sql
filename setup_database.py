@@ -18,7 +18,7 @@ def create_db():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
-    # 🔥 Drop old tables
+    # Drop old tables
     cur.executescript("""
     DROP TABLE IF EXISTS patients;
     DROP TABLE IF EXISTS doctors;
@@ -27,7 +27,7 @@ def create_db():
     DROP TABLE IF EXISTS invoices;
     """)
 
-    # 🔥 Create tables
+    #  Create tables
     cur.executescript("""
     CREATE TABLE patients(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,7 +169,7 @@ def create_db():
     conn.commit()
     conn.close()
 
-    print("✅ Created 200 patients, 15 doctors, 500 appointments, 350 treatments, 300 invoices")
+    print(" Created 200 patients, 15 doctors, 500 appointments, 350 treatments, 300 invoices")
 
 
 if __name__ == "__main__":
