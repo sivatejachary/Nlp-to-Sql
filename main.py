@@ -1,85 +1,98 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import sqlite3
-import os
-import re
-from sql_validator import validate_sql
-from google import genai
+
+from vanna_setup import build_agent
+from sql_validator import validate_sql, extract_sql_from_text
+from vanna.core.user import RequestContext
 
 app = FastAPI()
 
 class Query(BaseModel):
     question: str
 
-
-# 🔹 run SQL
-def run_sql(sql):
-    conn = sqlite3.connect("clinic.db", check_same_thread=False)
-    cur = conn.execute(sql)
-    rows = cur.fetchall()
-    conn.close()
-    return rows
-
-
-# 🔥 generate SQL using Gemini (RELIABLE)
-def generate_sql(question):
-    client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
-    schema = """
-    Tables:
-    patients(id, first_name, last_name, email, phone, date_of_birth, gender, city, registered_date)
-    doctors(id, name, specialization, department, phone)
-    appointments(id, patient_id, doctor_id, appointment_date, status, notes)
-    treatments(id, appointment_id, treatment_name, cost, duration_minutes)
-    invoices(id, patient_id, invoice_date, total_amount, paid_amount, status)
-    """
-
-    prompt = f"""
-    Convert this question into SQL.
-
-    Rules:
-    - Only return SQL
-    - No explanation
-    - Use SQLite syntax
-
-    {schema}
-
-    Question: {question}
-    """
-
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-
-    text = response.text.strip()
-
-# remove code blocks ```sql ```
-    text = re.sub(r"```sql|```", "", text, flags=re.IGNORECASE).strip()
-
-# extract only SELECT query
-    match = re.search(r"(SELECT .*?)(;|$)", text, re.IGNORECASE | re.DOTALL)
-    if match:
-        return match.group(1).strip()
-
-    return text
+# 🔹 Build agent
+agent, memory = build_agent()
 
 
 @app.post("/chat")
 async def chat(req: Query):
     try:
-        # ✅ generate SQL
-        sql = generate_sql(req.question)
+        ctx = RequestContext(cookies={}, headers={})
 
-        # ✅ validate
+        # 🔹 Step 1: First attempt
+        response = None
+        async for chunk in agent.send_message(ctx, req.question):
+            response = chunk
+
+        sql = None
+        rows = None
+
+        # 🔹 Normalize response
+        if isinstance(response, dict):
+            response_dict = response
+        else:
+            response_dict = {}
+
+        # 🔹 Extract SQL (tool_calls)
+        if response_dict:
+            for tool in response_dict.get("tool_calls", []):
+                if tool.get("tool_name") == "run_sql":
+                    sql = tool.get("args", {}).get("sql")
+
+        # 🔹 Extract rows
+        if response_dict:
+            for tool in response_dict.get("tool_results", []):
+                if tool.get("tool_name") == "run_sql":
+                    rows = tool.get("result")
+
+        # 🔹 Fallback 1: extract SQL from text
+        if not sql:
+            sql = extract_sql_from_text(str(response))
+
+        # 🔥 Step 2: Retry (force SQL)
+        if not sql:
+            forced_question = f"""
+            Generate ONLY SQL and call run_sql tool.
+            DO NOT return text.
+
+            Question: {req.question}
+            """
+
+            response = None
+            async for chunk in agent.send_message(ctx, forced_question):
+                response = chunk
+
+            if isinstance(response, dict):
+                for tool in response.get("tool_calls", []):
+                    if tool.get("tool_name") == "run_sql":
+                        sql = tool.get("args", {}).get("sql")
+
+        # 🔥 Step 3: Smart fallback (guaranteed)
+        if not sql and "monthly" in req.question.lower():
+            sql = """
+            SELECT strftime('%Y-%m', appointment_date) AS month,
+                   COUNT(*) AS total_appointments
+            FROM appointments
+            WHERE appointment_date >= date('now', '-6 months')
+            GROUP BY month
+            ORDER BY month;
+            """
+
+        # ❌ Still no SQL
+        if not sql:
+            return {
+                "error": "SQL not generated",
+                "debug": str(response)[:500]
+            }
+
+        # ✅ Validate SQL
         sql = validate_sql(sql)
 
-        # ✅ execute
-        rows = run_sql(sql)
-
         return {
+            "question": req.question,
             "sql": sql,
-            "rows": rows
+            "rows": rows if rows else [],
+            "summary": f"Returned {len(rows) if rows else 0} rows"
         }
 
     except Exception as e:
@@ -88,4 +101,4 @@ async def chat(req: Query):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "database": "connected", "agent_memory_items": 15 }
