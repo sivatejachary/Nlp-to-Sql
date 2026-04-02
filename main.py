@@ -13,7 +13,16 @@ class Query(BaseModel):
 #  Build agent
 agent, memory = build_agent()
 
-
+@app.get("/")
+def home():
+    return {
+        "message": "NL-to-SQL API is running 🚀",
+        "endpoints": {
+            "/chat": "POST → Ask questions",
+            "/health": "GET → Check status"
+        }
+    }
+    
 @app.post("/chat")
 async def chat(req: Query):
     try:
